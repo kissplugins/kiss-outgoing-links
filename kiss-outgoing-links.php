@@ -2,7 +2,7 @@
 /*
 Plugin Name: KISS Outgoing Links Scanner
 Description: Scans all posts (including custom post types) for outgoing HTTP/HTTPS links and lists them in an admin‑side table you can copy to the clipboard.
-Version: 1.1.0
+Version: 1.2.0
 Author: KISS Plugins | Neochrome, Inc.
 License: GPL‑2.0‑or‑later
 */
@@ -74,6 +74,7 @@ function ols_render_admin_page() {
                         <th><?php esc_html_e( 'Outgoing URL', 'ols' ); ?></th>
                         <th><?php esc_html_e( 'Text', 'ols' ); ?></th>
                         <th><?php esc_html_e( 'Approx. location in post %', 'ols' ); ?></th>
+                        <th><?php esc_html_e( 'Post/Page Title', 'ols' ); ?></th>
                         <th><?php esc_html_e( 'Actions', 'ols' ); ?></th>
                     </tr>
                 </thead>
@@ -84,12 +85,25 @@ function ols_render_admin_page() {
                         <td><?php echo esc_html( $row['text'] ); ?></td>
                         <td><?php echo esc_html( $row['percent'] ); ?>%</td>
                         <td>
+                            <?php
+                            $title = '';
+                            if ( ! empty( $row['post_id'] ) ) {
+                                $t = get_the_title( $row['post_id'] );
+                                if ( function_exists( 'mb_strlen' ) ) {
+                                    $title = mb_strlen( $t ) > 40 ? mb_substr( $t, 0, 40 ) . '...' : $t;
+                                } else {
+                                    $title = strlen( $t ) > 40 ? substr( $t, 0, 40 ) . '...' : $t;
+                                }
+                            }
+                            echo esc_html( $title );
+                            ?>
+                        </td>
+                        <td>
+                            <a href="<?php echo esc_url( $row['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View', 'ols' ); ?></a>
+                            |
                             <?php if ( ! empty( $row['post_id'] ) ) : ?>
-                                <a href="<?php echo esc_url( get_permalink( $row['post_id'] ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View', 'ols' ); ?></a>
-                                |
                                 <a href="<?php echo esc_url( get_edit_post_link( $row['post_id'] ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Edit', 'ols' ); ?></a>
                             <?php else : ?>
-                                <?php esc_html_e( 'View', 'ols' ); ?> |
                                 <?php esc_html_e( 'Edit', 'ols' ); ?>
                             <?php endif; ?>
                         </td>
