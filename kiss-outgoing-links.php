@@ -2,7 +2,7 @@
 /*
 Plugin Name: KISS Outgoing Links Scanner
 Description: Scans all posts (including custom post types) for outgoing HTTP/HTTPS links and lists them in an admin‑side table you can copy to the clipboard.
-Version: 1.0.0
+Version: 1.2.0
 Author: KISS Plugins | Neochrome, Inc.
 License: GPL‑2.0‑or‑later
 */
@@ -74,6 +74,8 @@ function ols_render_admin_page() {
                         <th><?php esc_html_e( 'Outgoing URL', 'ols' ); ?></th>
                         <th><?php esc_html_e( 'Text', 'ols' ); ?></th>
                         <th><?php esc_html_e( 'Approx. location in post %', 'ols' ); ?></th>
+                        <th><?php esc_html_e( 'Post/Page Title', 'ols' ); ?></th>
+                        <th><?php esc_html_e( 'Actions', 'ols' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -82,6 +84,25 @@ function ols_render_admin_page() {
                         <td><a href="<?php echo esc_url( $row['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $row['url'] ); ?></a></td>
                         <td><?php echo esc_html( $row['text'] ); ?></td>
                         <td><?php echo esc_html( $row['percent'] ); ?>%</td>
+                        <td>
+                            <?php if ( ! empty( $row['post_id'] ) ) : ?>
+                                <?php
+                                $title = get_the_title( $row['post_id'] );
+                                echo esc_html( mb_strimwidth( $title, 0, 40, '...' ) );
+                                ?>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if ( ! empty( $row['post_id'] ) ) : ?>
+                                <a href="<?php echo esc_url( get_permalink( $row['post_id'] ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View', 'ols' ); ?></a>
+                                |
+                                <a href="<?php echo esc_url( get_edit_post_link( $row['post_id'] ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Edit', 'ols' ); ?></a>
+                            <?php else : ?>
+                                <a href="<?php echo esc_url( $row['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View', 'ols' ); ?></a>
+                                |
+                                <?php esc_html_e( 'Edit', 'ols' ); ?>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -94,7 +115,12 @@ function ols_render_admin_page() {
 /**
  * Perform the heavy‑lifting: scan posts and extract links.
  *
- * @return array[] {\n *     @type string $url     The outbound URL.\n *     @type string $text    Anchor text.\n *     @type int    $percent Position of the link within the post, rounded.\n * }
+ * @return array[] {
+ *     @type string $url     The outbound URL.
+ *     @type string $text    Anchor text.
+ *     @type int    $percent Position of the link within the post, rounded.
+ *     @type int    $post_id ID of the post containing the link.
+ * }
  */
 function ols_perform_scan() {
     global $wpdb;
@@ -142,6 +168,7 @@ function ols_perform_scan() {
                     'url'     => $href,
                     'text'    => $anchor_text,
                     'percent' => $percent,
+                    'post_id' => $post->ID,
                 );
             }
         }
