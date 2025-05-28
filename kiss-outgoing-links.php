@@ -50,7 +50,8 @@ function ols_render_admin_page() {
     // Handle the scan request.
     if ( isset( $_POST['ols_scan'] ) && check_admin_referer( 'ols_scan_action', 'ols_scan_nonce' ) ) {
         $results = ols_perform_scan();
-        update_option( 'ols_scan_results', $results );
+        // Store the results but don't autoload them to keep memory usage low.
+        update_option( 'ols_scan_results', $results, 'no' );
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Scan completed successfully.', 'ols' ) . '</p></div>';
     }
 
