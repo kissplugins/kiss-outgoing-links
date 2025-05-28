@@ -5,11 +5,21 @@ Description: Scans all posts (including custom post types) for outgoing HTTP/HTT
 Version: 1.1.0
 Author: KISS Plugins | Neochrome, Inc.
 License: GPL‑2.0‑or‑later
+Text Domain: ols
+Domain Path: /languages
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
+
+/**
+ * Load plugin translations.
+ */
+function ols_load_textdomain() {
+    load_plugin_textdomain( 'ols', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'init', 'ols_load_textdomain' );
 
 /**
  * Register the admin menu entry.
