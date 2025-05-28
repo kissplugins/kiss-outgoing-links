@@ -5,21 +5,11 @@ Description: Scans all posts (including custom post types) for outgoing HTTP/HTT
 Version: 1.1.0
 Author: KISS Plugins | Neochrome, Inc.
 License: GPL‑2.0‑or‑later
-Text Domain: ols
-Domain Path: /languages
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
-
-/**
- * Load plugin translations.
- */
-function ols_load_textdomain() {
-    load_plugin_textdomain( 'ols', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
-add_action( 'init', 'ols_load_textdomain' );
 
 /**
  * Register the admin menu entry.
@@ -60,8 +50,7 @@ function ols_render_admin_page() {
     // Handle the scan request.
     if ( isset( $_POST['ols_scan'] ) && check_admin_referer( 'ols_scan_action', 'ols_scan_nonce' ) ) {
         $results = ols_perform_scan();
-        // Store the results but don't autoload them to keep memory usage low.
-        update_option( 'ols_scan_results', $results, 'no' );
+        update_option( 'ols_scan_results', $results );
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Scan completed successfully.', 'ols' ) . '</p></div>';
     }
 
@@ -95,11 +84,12 @@ function ols_render_admin_page() {
                         <td><?php echo esc_html( $row['text'] ); ?></td>
                         <td><?php echo esc_html( $row['percent'] ); ?>%</td>
                         <td>
-                            <a href="<?php echo esc_url( $row['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View', 'ols' ); ?></a>
-                            |
                             <?php if ( ! empty( $row['post_id'] ) ) : ?>
+                                <a href="<?php echo esc_url( get_permalink( $row['post_id'] ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View', 'ols' ); ?></a>
+                                |
                                 <a href="<?php echo esc_url( get_edit_post_link( $row['post_id'] ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Edit', 'ols' ); ?></a>
                             <?php else : ?>
+                                <?php esc_html_e( 'View', 'ols' ); ?> |
                                 <?php esc_html_e( 'Edit', 'ols' ); ?>
                             <?php endif; ?>
                         </td>
